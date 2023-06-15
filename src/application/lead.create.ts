@@ -13,12 +13,14 @@ export class LeadCreate {
   public async sendMessageAndSave({
     message,
     phone,
+    adjunto
   }: {
     message: string;
     phone: string;
+    adjunto: boolean;
   }) {
     const responseDbSave = await this.leadRepository.save({ message, phone });//TODO DB
-    const responseExSave = await this.leadExternal.sendMsg({ message, phone });//TODO enviar a ws
+    let responseExSave = adjunto ? await this.leadExternal.sendMsgDocumento({ message, phone }) : await this.leadExternal.sendMsg({ message, phone });//TODO enviar a ws
     return {responseDbSave, responseExSave};
   }
 }

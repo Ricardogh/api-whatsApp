@@ -50,13 +50,34 @@ class WsTransporter extends Client implements LeadExternal {
     try {
       if (!this.status) return Promise.resolve({ error: "WAIT_LOGIN" });
       const { message, phone } = lead;
-      console.log(`${phone}@c.us`);      
+      console.log(`${phone}@c.us`);
       const response = await this.sendMessage(`${phone}@c.us`, message);
-      this.sendDocument(lead);
+      // this.sendDocument(lead);
       return { id: response.id.id };
     } catch (e: any) {
       return Promise.resolve({ error: e.message });
     }
+  }
+
+  async sendMsgDocumento(lead: { message: string; phone: string }) {
+    try {
+        const { message, phone } = lead; 
+        const chatId = `${phone}@c.us`; // ID del chat al que deseas enviar el documento
+        const filePath = `${process.cwd()}/tmp/prueba.pdf`; // Ruta del archivo que deseas adjuntar
+        // Leer el archivo
+        const fileData = fs.readFileSync(filePath);
+        const base64Data = fileData.toString('base64');
+
+        if (!this.status) return Promise.resolve({ error: "WAIT_LOGIN" });
+        console.log(chatId);
+        const media = new MessageMedia('application/pdf', base64Data, 'prueba.pdf');
+        const response = await this.sendMessage(chatId, message, {media});
+        console.log('Documento enviado satisfactoriamente...')
+        return { id: response.id.id };
+      } catch (error: any) {
+          console.error('Error al enviar el documento adjunto:', error);
+          return Promise.resolve({ error: error.message });
+      }
   }
 
   getStatus(): boolean {
@@ -70,19 +91,6 @@ class WsTransporter extends Client implements LeadExternal {
     console.log(`⚡ Recuerda que el QR se actualiza cada minuto ⚡'`);
     console.log(`⚡ Actualiza F5 el navegador para mantener el mejor QR⚡`);
   };
-
-  async sendDocument(lead: { message: string; phone: string }) {
-    const chatId = 'XXXXXXXXXXXX@c.us'; // ID del chat al que deseas enviar el documento
-    const filePath = 'tmp/prueba.pdf'; // Ruta del archivo que deseas adjuntar
-    const { phone } = lead;
-    try {
-        const media = new MessageMedia('application/pdf', fs.readFileSync(filePath), 'documento.pdf');
-        await this.sendMessage(`${phone}@c.us`, media);
-        console.log('Documento adjunto enviado con éxito');
-    } catch (error) {
-        console.error('Error al enviar el documento adjunto:', error);
-    }
-  }
 }
 
 export default WsTransporter;

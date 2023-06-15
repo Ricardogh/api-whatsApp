@@ -43,5 +43,26 @@ export default class MetaRepository implements LeadExternal {
     return body
   }
 
+  async sendMsgDocumento({
+    message,
+    phone,
+  }: {
+    message: string;
+    phone: string;
+  }): Promise<any> {
+    try{
+        const body = this.parseBody({message, phone})
+        const response = await axios.post(URL,body, {
+          headers: {
+            Authorization: `Bearer ${META_TOKEN}`,
+          },
+        }) as any;
+    
+        return response.data
+    }catch(e){
+        return Promise.resolve(e)
+    }
+  }
+
 
 }
